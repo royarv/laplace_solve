@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Integradora Ecuaciones Diferenciales</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --muted: #666;
+            --accent: #764ba2;
+            --input-bg: #ffffff;
+            --border: #ddd;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #9d65ff;
+            --input-bg: #0f172a;
+            --border: #334155;
+        }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text);
+            transition: all 0.3s ease;
+            margin: 0; padding: 20px; /* Reducido para móviles */
+        }
+
+        .card { 
+            background: var(--card); 
+            border-radius: 20px; 
+            padding: 25px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            max-width: 900px; margin: auto; 
+        }
+
+        .project-header h1 { margin: 0; font-size: 1.5rem; color: var(--accent); } /* Tamaño ajustable */
+        .project-header p { font-size: 0.9rem; margin: 10px 0; }
+
+        .theme-row { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 20px; }
+        
+        /* DISEÑO DE GRILLA FLEXIBLE */
+        .input-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+
+        /* AJUSTE ESPECÍFICO PARA MÓVILES */
+        @media (max-width: 600px) {
+            .input-grid {
+                grid-template-columns: 1fr 1fr; /* 2 columnas en móvil */
+            }
+            .full-mobile {
+                grid-column: span 2; /* El campo f(t) ocupará todo el ancho */
+            }
+            .project-header h1 { font-size: 1.3rem; }
+            .formula { font-size: 1rem !important; overflow-x: auto; } /* Evita que la fórmula se corte */
+        }
+
+        label { font-size: 0.75rem; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 5px; display: block; }
+        input, select { 
+            width: 100%; padding: 12px; border-radius: 8px; box-sizing: border-box;
+            border: 1px solid var(--border); background: var(--input-bg); color: var(--text);
+        }
+
+        button { 
+            background: var(--accent); color: white; border: none; padding: 16px; 
+            border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1rem;
+        }
+
+        .results { margin-top: 30px; display: none; }
+        .formula { 
+            font-size: 1.2rem; margin: 15px 0; padding: 15px; 
+            background: rgba(157, 101, 255, 0.08); border-radius: 12px; 
+            text-align: center; white-space: nowrap; overflow-x: auto;
+        }
+        img { width: 100%; height: auto; border-radius: 12px; }
+
+        /* Switch Estilo iPhone */
+        .theme-switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .theme-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="project-header" style="text-align: center; border-bottom: 2px solid var(--accent); padding-bottom: 15px; margin-bottom: 15px;">
+        <h1>Integradora Ecuaciones Diferenciales</h1>
+        <p>Calculadora de Ecuaciones Diferenciales ordinarias de primer y segundo orden utilizando la transformada de Laplace</p>
+        <div style="font-size: 0.75rem; color: var(--muted);">
+            Rodrigo A.M, José Manuel M.S, Emmanuel A.G, Basilio Uriel S.B
+        </div>
+    </div>
+
+    <div class="theme-row">
+        <span style="font-size: 0.7rem; font-weight: bold;">MODO OSCURO</span>
+        <label class="theme-switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div class="input-grid">
+        <div><label>Orden</label>
+            <select id="order"><option value="1">1er Orden</option><option value="2">2do Orden</option></select>
+        </div>
+        <div><label>Coef. a (y'')</label><input type="number" id="coeff_a" value="1"></div>
+        <div><label>Coef. b (y')</label><input type="number" id="coeff_b" value="3"></div>
+        <div><label>Coef. c (y)</label><input type="number" id="coeff_c" value="2"></div>
+    </div>
+
+    <div class="input-grid">
+        <div class="full-mobile"><label>Función f(t)</label><input type="text" id="ft" value="0"></div>
+        <div><label>y(0)</label><input type="number" id="y0" value="0"></div>
+        <div><label>y'(0)</label><input type="number" id="yp0" value="1"></div>
+    </div>
+
+    <button onclick="calculate()">RESOLVER ECUACIÓN</button>
+
+    <div id="resultsArea" class="results">
+        <label>Ecuación Planteada:</label>
+        <div id="outEqInicial" class="formula" style="border-left: 4px solid var(--accent);"></div>
+        
+        <label>Transformada Y(s):</label>
+        <div id="outYs" class="formula"></div>
+        
+        <label>Solución y(t):</label>
+        <div id="outYt" class="formula"></div>
+        
+        <div style="text-align: center;"><img id="plot" src=""></div>
+    </div>
+</div>
+
+<script>
+    // Lógica tema
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('change', () => {
+        const theme = themeToggle.checked ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    });
+    if (localStorage.getItem('theme') === 'dark') {
+        themeToggle.checked = true;
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+
+    async function calculate() {
+        const payload = {
+            order: document.getElementById('order').value,
+            coeff_a: document.getElementById('coeff_a').value,
+            coeff_b: document.getElementById('coeff_b').value,
+            coeff_c: document.getElementById('coeff_c').value,
+            ft: document.getElementById('ft').value,
+            y0: document.getElementById('y0').value,
+            yp0: document.getElementById('yp0').value
+        };
+
+        try {
+            const res = await fetch('/solve', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('resultsArea').style.display = 'block';
+                document.getElementById('outEqInicial').innerHTML = `\\[ ${data.result.eq_inicial} \\]`;
+                document.getElementById('outYs').innerHTML = `\\[ ${data.result.Y_s} \\]`;
+                document.getElementById('outYt').innerHTML = `\\[ ${data.result.y_t} \\]`;
+                document.getElementById('plot').src = 'data:image/png;base64,' + data.plot;
+                MathJax.typesetPromise();
+            } else { alert("Error: " + data.error); }
+        } catch (e) { alert("Error de conexión"); }
+    }
+</script>
+
+</body>
+</html>
