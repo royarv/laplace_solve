@@ -1,4 +1,6 @@
-Flask==2.3.3
-sympy==1.12
-numpy==1.24.3
-matplotlib==3.7.2
+flask
+sympy
+numpy
+matplotlib
+gunicorn
+setuptools
