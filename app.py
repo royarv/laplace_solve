@@ -20,7 +20,7 @@ class LaplaceSolver:
         t, s = self.t, self.s
         order = int(data.get('order', 1))
         
-        # EL CAMBIO: Usamos sp.Rational para mantener fracciones exactas
+        # sp.Rational para mantener fracciones exactas
         # Esto convierte el "1" o "0.5" del usuario en una fracción real de SymPy
         a = sp.Rational(data.get('coeff_a', 1) or 1)
         b = sp.Rational(data.get('coeff_b', 0) or 0)
@@ -31,7 +31,7 @@ class LaplaceSolver:
         local_dict = {'t': t, 'exp': sp.exp, 'sin': sp.sin, 'cos': sp.cos, 'pi': sp.pi}
         
         ft_raw = str(data.get('ft', '0')).strip()
-        # Convertimos la entrada f(t) también a forma racional si es posible
+        # Conversion de la entrada f(t) también a forma racional si es posible
         f_t = sp.parse_expr(ft_raw, local_dict=local_dict)
         
         F_s = sp.laplace_transform(f_t, t, s, nocds=True)
@@ -46,7 +46,7 @@ class LaplaceSolver:
         Y_s_sol = sp.solve(eq_s, Y)[0]
         y_t_sol = sp.inverse_laplace_transform(Y_s_sol, s, t).doit()
         
-        # Usamos simplify para que junte los términos en una sola fracción elegante
+        # Uso de simplify para que junte los términos en una sola fracción elegante
         return sp.simplify(Y_s_sol), sp.simplify(y_t_sol)
 
 solver = LaplaceSolver()
@@ -74,7 +74,6 @@ def solve():
             eq_text = f"{b}y' + {c}y = {ft}"
 
         # 3. Limpiar Heaviside para que la fórmula se vea más estética
-        # Solo lo quitamos de la vista de texto, no del cálculo de la gráfica
         y_t_view = y_t.replace(sp.Heaviside(solver.t), 1) if y_t.has(sp.Heaviside) else y_t
         
         # 4. Generar la gráfica en formato base64
